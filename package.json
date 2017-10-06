@@ -1,0 +1,19 @@
+{
+  "name": "MithrilMorseTutorial",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack src/index.js bin/app.js -d --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mithril": "^1.1.4"
+  },
+  "devDependencies": {
+    "webpack": "^3.6.0"
+  }
+}
