@@ -46,7 +46,7 @@ We will use the [Morse Node API](https://github.com/calvindn/morse-node) since i
 
 Now it is time to get the skeleton parts made. Mithril uses HTML5, so you won't need the `html`, `head`, and `body` tags. The respective DOM elements are still there though implicitly when a browser renders the markup. This keeps with the theme of simplicity in Mithril. When you make a Mithril application, the application lives in a namespace and will contain modules. This is the model part of the MVC framework. Each module will represent a component or a page. In other words, we bind each HTML tag that exists in the DOM to the Mithril so you can get a virtual HTML page without having to actually write HTML. If you have worked with the popular frameworks, then this should feel similar. To demonstrate this, here's the main layout:
 
-``javascript
+js
 // index.js
 var m = require("mithril")
 var root = document.body
@@ -56,18 +56,26 @@ m.render(root, [
         m("h1", { class: "title" }, "Hello Mithril"),
     ])
 ])
-```
+
 
 Which gives us this as a result:
 
-<html>
+
+{% highlight html %}
+{% raw %}
+
+{{<html>
 	<head>
 	    <title>Hello Mithril</title>
 	</head>
 	  <body>
 	    <script src="bin/app.js"></script>
 	  </body>
-</html>
+</html>}}
+
+{% endraw %}
+{% endhighlight %}
+
 
 Not bad, eh? Almost time to make this app do cool stuff. You may have noticed the "m" object in the code. That's Mithril being called so it automatically figures out what we are doing. As we add the rest of the components to our app, you will see why this is awesome. Now that we have the landing page ready, it is time to make the app work.  We will want to make a module to store the state of a message, so inside `src` directory, make a models directory.  This is where the components will live.
 
@@ -75,7 +83,7 @@ Not bad, eh? Almost time to make this app do cool stuff. You may have noticed th
 
 Let's add in a button and change a few things we proceed to the components. Inside the directory, create a `Message.js` file and put this code in:
 
-``javascript
+js
 // src/views/Message.js
 var m = require("mithril")
 var Message = require("../models/Message")
@@ -89,11 +97,11 @@ module.exports = {
     }
 }
 m.mount(root, Message)
-```
+
 
 Mithril treats components as objects with view methods. Create a `views` directory nested in the `src` one and then add in a `.js` file. We will require Mithril in this file, create the code object, and make a function for it.  
 
-In the `index.js` file, we will call the Message component.  In the Message file, we will call it up with `m.mount(root, Message)`. Mount is how you call your components in Mithril. To show this, we will now make another component in the Message one. This component is a list of the alphabet and Morse symbols that will get called up when the user types something in.  It's a component nested inside another component like the Russian nesting dolls.
+In the `index.js` file, we will call the Message component.  In the Message file, we will call it up with `m.mount(root, Message)`. Mount is how you call your components in Mithril. To show this, we will now make another component in the Message one. This component is a list of the alphabet and Morse symbols that will get called up when the user types something in.  It's a component nested inside another component like the
 
 
 
