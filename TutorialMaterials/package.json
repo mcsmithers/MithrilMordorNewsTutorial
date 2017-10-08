@@ -1,19 +1,30 @@
 {
-  "name": "MithrilMorseTutorial",
+  "name": "mithrilmordoenewstutorial",
   "version": "1.0.0",
-  "description": "",
+  "description": "\"# MithrilMorseTutorial\"",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack src/index.js bin/app.js -d --watch"
   },
   "keywords": [],
-  "author": "",
+  "author": "Christina Smithers",
   "license": "ISC",
   "dependencies": {
     "mithril": "^1.1.4"
   },
   "devDependencies": {
     "webpack": "^3.6.0"
-  }
+  },
+  "bin": {
+    "mithrilmordoenewstutorial": "app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcsmithers/MithrilMordorNewsTutorial.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mcsmithers/MithrilMordorNewsTutorial/issues"
+  },
+  "homepage": "https://github.com/mcsmithers/MithrilMordorNewsTutorial#readme"
 }
