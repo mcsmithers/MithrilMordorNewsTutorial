@@ -14,6 +14,8 @@ m.render(root, [
     ])
 ])
 
+
+// TODO: Take out cors for final API endpoints
 const cors = 'https://cors.now.sh/'
 const GameNews = {
     newsList: [],
@@ -44,7 +46,7 @@ m.mount(document.body, {
     ]
 })
 
-// Authorization component
+// Authorization component with its params
 const Authorization = {
     responseType: 'token id_token',
     redirectUri: 'http://localhost:3000/',
@@ -53,7 +55,7 @@ const Authorization = {
     error: "Error - something went wrong!"
 }
 
-
+//TODO:  Get how Authorization objet will work and fill it in here so it mounts
 // This part will get filled in
 // m.mount(document.body, {
 //             oninit: => Auth0.authorize(),
@@ -73,7 +75,8 @@ const User = {
 }
 
 
-// This is in a Navbar component 
+// This is the user component being rendered into the navbar
+// TODO: Make this all render well so it is all in one line and 
 // m("ul.nav.navbar-nav.navbar-right",
 //     m("li.dropdown", {class: "User"}, [
 //         m("a.dropdown-toggle[data-toggle='dropdown'][href='#']", [
