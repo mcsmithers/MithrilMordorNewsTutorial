@@ -11,6 +11,7 @@
   "author": "Christina Smithers",
   "license": "ISC",
   "dependencies": {
+    "auth0-js": "^8.10.1",
     "mithril": "^1.1.4"
   },
   "devDependencies": {

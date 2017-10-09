@@ -1,0 +1,16 @@
+body {
+	background: #C5CAE9 0 0 repeat;
+}
+
+h1 {
+	color: #FFF;
+	background-color: #3F51B5;
+}
+
+.GameNewsList a {
+	color: 	#000000;
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: underline;
+    background: transparent;
+}

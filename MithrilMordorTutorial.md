@@ -1,4 +1,4 @@
-# Learn MithrilJS with a game News App
+# Learn MithrilJS: Build a Game News App with Authentication
 ![Mithril logo](https://mithril.js.org/logo.svg "Mithril Logo")
 
 
@@ -139,13 +139,82 @@ const GameNews = {
 m.mount(document.body, {
     oninit: () => GameNews.loadList(),
     view: () => [
+        m("h1",
+            "Mithril's Shadow of Mordor Game News"
+        ),
         m("ul", [
-            GameNews.newsList.map(n => m('ul', n.title)),
-            m("li",
-                GameNews.newsList.map(n => m('li', n.contents))
-            )
+            GameNews.newsList.map(n => m('ul', n.title))
         ])
     ]
 })``
 
-Well, it works, but it is ugly and inefficient and then of course we need to do real API calls.
+Well, it works, but it can be prettier and more efficient and then of course we need to do real API calls. We at least know roughly what we will get when we set up the endpoints properly. 
+
+### API
+
+Mithril has requests handled using [XHR](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest).  The requests are set up like [this](https://mithril.js.org/request.html).  `promise = m.request([url,] options)` is along the lines of what we will need and is consistent with how you're used to getting these.
+
+### Styling
+Now that we have what we need from Steam, it's time to make this look nicer and become responsive.  
+
+Let's get the header looking better first.  We will start out by making the letters become white and giving the background a lovely shade from the Shire with a palette from the [Google Material Design guidelines](https://material.io/guidelines/style/color.html#color-color-palette) which were expertly put together to help websites have good color combinations.
+
+Let's also make the list of news titles become a list group since that will look much nicer as well as use the Bootstrap responsiveness. You can change it all over from the HTML to the Mithril using the converter I shared earlier to make this faster.
+
+``
+
+After this we can make the news list look a little nicer too as well.
+
+``js
+m.mount(document.body, {
+    oninit: () => GameNews.loadList(),
+    view: () => [
+        m("h1", { class: "GameHeader" },
+            "Mithril's Shadow of Mordor Game News"
+        ),
+        m("ul.list-group",
+            m("li.list-group-item", { class: "GameGroup" },[
+                GameNews.newsList.map(n => m('li', n.title))
+            ])
+        )
+    ]
+})
+``
+
+``css
+body, {
+    font: normal 16px Verdana;
+    margin: 0;
+}
+.GameHeader {
+    color: #FFFFFF;
+    background-color: #3F51B5;
+}
+.GameNewsList {
+    background-color: #9FA8DA;
+}
+``
+
+Please note that some of the CSS you will have to manually tinker with them such as for list groups.  It's all in how the virtual HTML is working.
+
+
+### Authentication
+
+The final parts of our work will be to add authentication. This will help with authentication for secured endpoints.  
+
+Let's go the the [Auth0 dashboard](https://manage.auth0.com/#/) to begin. We want to start by setting up the client.
+
+1. Click on the client menu part of the dashboard and you will want to choose the single page web applications option.  YOu will also have to name the application.  After you choose the single page option, click on "Create".
+2. You will be prompted to choose a technology, so choose "JavaScript".  Mithril isn't on there right now, but since it uses pure JavaScript, it will process well.
+3. The next thing that needs to be set are the callback parameters.  `http://localhost:3000` is what you will want to put into the Allowed Callback URLs.  The same goes for the Allowed Origins.
+4. Since we are going to be dealing with JSON, we will need to then use a JsonWebToken Algorithm.  To do this, scroll to the bottom of your settings to get to the advanced settings.  Select the OAuth tab and then verify that the algorithm is set to `RS256`.  If not, click on the dropdown and select R256.  
+5. If you want to use a social connection such as your GitHub account, you can do that on the left at the connctions menu and toggle the connections you would like to use.
+5. Now we will need to set up an API.  On the upper right-hand corner where your account icon is, click on the menu arrow and select Settings. You can fill in your company information and then the API authorization settings.  Click Save so your changes are kept.
+6. Go back to the left menu and click on the "Create API" button. Enter a name for the API. Set the Identifier to your API endpoint URL. You can use something like `localhost:3030/api/`. The Signing Algorithm should be RS256 as we set earlier.  Please note that you are advised to set up protection for your Node API.  The routes we have set don't have protection yet, so you can keep everything secure by making an Authorization header.  You can view how to do this by checking out the Node example on the [Quick Start](https://auth0.com/docs/quickstart/backend/nodejs).
+
+It's time to head back into into our work and add the authentication logic.  Install [auth0-js] (https://github.com/auth0/auth0.js) with the `npm install auth0-js --save` command.
+
+DLet's dive into our `index.js` file we have been working with and get the logic set up into two components.  Start out by importing Auth0: `import auth0 from 'auth0-js';`.
+
+
+Now let's create a new component for a login.
