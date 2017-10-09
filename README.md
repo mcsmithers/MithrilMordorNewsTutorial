@@ -7,7 +7,7 @@ This tutorial will  introduce you to [Mithril](https://Mithril.js.org/), a Java
 
 We are going to make an app that will retrieve news of a game using the [Valve Steam API](https://developer.valvesoftware.com/wiki/Steam_Web_API).  After that, we will use [Auth0](https://auth0.com/) to authenticate with a login.
 
-### Meet Mithril 
+### Meet Mithril
 
 Mithril is a client-side JavaScript MVC framework created by Leo Horie. Mithril is light and speedy.  It's named after the metal used in armor from J.R.R. Tolkein's Lord of the Rings trilogy.  You will find it used in the Guild Wars 2 game, Nike, and Udemy. 
 
@@ -39,14 +39,14 @@ As developers, we value a good production app and minify things where we can so 
 
 For styling, we will use [Bootstrap](http://getbootstrap.com/). For this tutorial, I am going to use a CDN. If you want a local installation, run `npm install bootstrap -g` to make Bootstrap global on your system and then import it in the `index.js` file.
 
-We will use the [Steam  Web API](https://developer.valvesoftware.com/wiki/Steam_Web_API).  If you don't have a Steam account already, it is free as is the API.  If you already have an account, sign in first.  Once you are logged into an account, you can get a key from [here](https://steamcommunity.com/dev/apikey).  To keep things simple, we will then use a Node wrapper for the Steam API.  To get this, `npm install steam-web` is all you need.
+We will use the [Steam  Web API](https://developer.valvesoftware.com/wiki/Steam_Web_API).  If you don't have a Steam account already, it is free as is the API.  If you already have an account, sign in first.  Once you are logged into an account, you can get a key from [here](https://steamcommunity.com/dev/apikey).
 
 
 ### Scaffolding
 
 Now it is time to get the skeleton parts made. Mithril uses HTML5, so you won't need the `html`, `head`, and `body` tags. The respective DOM elements are still there though implicitly when a browser renders the markup. This keeps with the theme of simplicity in Mithril. When you make a Mithril application, the application lives in a namespace and will contain modules. This is the model part of the MVC framework. Each module will represent a component or a page. In other words, we bind each HTML tag that exists in the DOM to the Mithril so you can get a virtual HTML page without having to actually write HTML. If you have worked with the popular frameworks, then this should feel similar. To demonstrate this, here's the main layout:
 
-``javascript
+js
 // index.js
 var m = require("mithril")
 var root = document.body
@@ -55,49 +55,97 @@ m.render(root, [
     m("main", [
         m("h1", { class: "title" }, "One Mithril App to Rule Them All"),
     ])
-])``
+])
 
 
 Which gives us this as a result:
 
-<html>
-	<head>
-	    <title>One Mithril App to Rule Them All</title>
-	</head>
-	  <body>
-	    <script src="bin/app.js"></script>
-	  </body>
-</html>
+
+{% highlight html %}
+{% raw %}
+
+{{<html>
+    <head>
+        <title>One Mithril App to Rule Them All</title>
+    </head>
+      <body>
+        <script src="bin/app.js"></script>
+      </body>
+</html>}}
+
+{% endraw %}
+{% endhighlight %}
 
 
 Not bad, eh? Almost time to make this app do cool stuff. You may have noticed the "m" object in the code. That's Mithril being called so it automatically figures out what we are doing. As we add the rest of our app, you will see why this is awesome. Now that we have the landing page ready, it is time to make the app work.  We will want to make a module to store the state of a game's news, so inside `src` directory, make a models directory.  This is where the [components](https://mithril.js.org/components.html) will live.
 
 ### Components
 
-Let's add in a button and change a few things. Inside the directory, create a `GameNews.js` file and put this code in:
+Let's now start making this app do something by adding the following code to our file:
 
 ``javascript
-// src/models/GameNews.js
-var m = require("mithril")
-var steam = require('steam-web');
-var GameNews = {
-    list: [],
+// This is our component
+const GameNews = {
+    newsList: [],
     loadList: function() {
-        return m.request({
-            method: "GetNewsForApp",
-            url: "http://api.steampowered.com/ISteamNews/",
-            withCredentials: true,
-            format: json,
-            count: 5
-        })
-        .then(function(result) {
-            GameNews.list = result.data
-        })
-    },
+        m.request({
+                url: 'http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/',
+                data: { appid: 241930, name: "Middle Earth: Shadow of War" }
+            })
+            .then(function(result) {
+                GameNews.newsList = result.appnews.newsitems
+            })
+            .catch(error => console.log(error.message))
+    }
 }
-module.exports = GameNews``
+m.mount(document.body, {
+    oninit: () => GameNews.loadList(),
+    view: () => [
+        m('h1', 'Middle Earth: Shadow of War News'),
+        m("ul",
+            m("li.newsitem", [
+                m(".title",
+                    "Title"
+                ),
+                m(".contents",
+                    "Contents"
+                )
+            ])
+        )
+    ]
+})
+``
 
+Mithril treats components as objects with view methods. Another thing you can do is to use the `getElementByID` method and then use it to tie into an HTML tag.  If you want to try a nice tool using this approach, Arthur Clemens made a [tool](http://arthurclemens.github.io/mithril-template-converter/index.html) that will turn HTML into Mithril JS.  Now we have the basi structure set up for a list of news items.  We now need to get the data to populate it.
 
-Mithril treats components as objects with view methods. Create a `views` directory nested in the `src` one and then add in a `.js` file. In the `index.js` file, we will call the Message component.  In the `GameNews.js` file, we will code in `m.mount(root, GameNews)`. Mount is how you call your components in Mithril. If you haven't used a JavaScript framework before, this framework will save you from coding objects over and over again by making them into reusable templates.  Components also keep things organized which is great for project maintenance.  
+The method from the Steam API we will be using in this app will be the GetNewsForApp one and the app id for the Middle Earth: Shadow of War game is 241930.  We can check it against this [url](http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=241930&count=5&maxlength=300&format=json) to see that things are correct. Let's do a quick test using [cors](https://cors.now.sh/)  to see what we get with what we have so far:
 
-The method we will be using in this app will be the GetNewsForApp one and the app id for the Middle Earth: Shadow of War game is 241930.  The default output will be json and let's limit the new to three for now with a maximal length of 300.  We can check it against this [url](http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=241930&count=5&maxlength=300&format=json) t see that things are correct.
+``javascript
+// This is our component
+const cors = 'https://cors.now.sh/'
+const GameNews = {
+    newsList: [],
+    loadList: function() {
+        m.request({
+                url: cors + 'http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/',
+                data: { appid: 241930, name: "Middle Earth: Shadow of War" }
+            })
+            .then(function(result) {
+                GameNews.newsList = result.appnews.newsitems
+            })
+            .catch(error => console.log(error.message))
+    }
+}
+m.mount(document.body, {
+    oninit: () => GameNews.loadList(),
+    view: () => [
+        m("ul", [
+            GameNews.newsList.map(n => m('ul', n.title)),
+            m("li",
+                GameNews.newsList.map(n => m('li', n.contents))
+            )
+        ])
+    ]
+})``
+
+Well, it works, but it is ugly and inefficient and then of course we need to do real API calls.
