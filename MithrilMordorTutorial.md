@@ -29,7 +29,7 @@ We will begin the tutorial by setting up our tools we will be using. Without fur
 
 ### Dependencies
 
-Again, part of Mithril's beauty is that it frees you of a long list of dependencies so this will be brief. To start with, I will need to have [Node](https://nodejs.org/en/) installed on your system.   If you don't have it already, you can download it from their [website](https://nodejs.org/en/download/).  There are many ways to install Mithril on your system if you prefer [other](https://Mithril.js.org/installation.html) such as with Bower is you prefer that instead. We will use Webpack like the Mithril page does: `npm install mithril --save`, run `npm install webpack --save` and then `npm init --yes` to generate the `package.json` file. 
+Again, part of Mithril's beauty is that it frees you of a long list of dependencies so this will be brief. To start with, I will need to have [Node](https://nodejs.org/en/) installed on your system.   If you don't have it already, you can download it from their [website](https://nodejs.org/en/download/).  There are many ways to install Mithril on your system if you prefer [other](https://Mithril.js.org/installation.html) such as with Bower is you prefer that instead. We will use Webpack like the Mithril page does: `npm install mithril --save`, run `npm install webpack --save` and then `npm init --yes` to generate the `package.json` file. We will be using es6 syntax, so if you don't have [Babel](https://babeljs.io/blog/2015/10/31/setting-up-babel-6) set up you will want to do so.
 
 Using npm, we will use the `npm --install yes`. Update the package file to call up the script with `"start": "webpack src/index.js bin/app.js -d --watch"` in the scripts.
 
@@ -46,17 +46,20 @@ We will use the [Steam  Web API](https://developer.valvesoftware.com/wiki/Steam_
 
 Now it is time to get the skeleton parts made. Mithril uses HTML5, so you won't need the `html`, `head`, and `body` tags. The respective DOM elements are still there though implicitly when a browser renders the markup. This keeps with the theme of simplicity in Mithril. When you make a Mithril application, the application lives in a namespace and will contain modules. This is the model part of the MVC framework. Each module will represent a component or a page. In other words, we bind each HTML tag that exists in the DOM to the Mithril so you can get a virtual HTML page without having to actually write HTML. If you have worked with the popular frameworks, then this should feel similar. To demonstrate this, here's the main layout:
 
-js
+```javascript
 // index.js
-var m = require("mithril")
-var root = document.body
-var steam = require('steam-web');
-m.render(root, [
-    m("main", [
-        m("h1", { class: "title" }, "One Mithril App to Rule Them All"),
-    ])
-])
+import m from 'mithril';
 
+const App = {
+    view: function() {
+        return ('.container',
+            m('h1', 'Hello Mithril'),
+            m(gameNewsList)
+        );
+    }
+};
+m.mount(document.body, App);
+```
 
 Which gives us this as a result:
 
@@ -66,7 +69,7 @@ Which gives us this as a result:
 
 {{<html>
 	<head>
-	    <title>One Mithril App to Rule Them All</title>
+	    <title>Hello Mithril</title>
 	</head>
 	  <body>
 	    <script src="bin/app.js"></script>
@@ -81,121 +84,111 @@ Not bad, eh? Almost time to make this app do cool stuff. You may have noticed th
 
 ### Components
 
-Let's now start making this app do something by adding the following code to our file:
+Let's now start making this app do something by adding a file named `game-news-list.js` that contains:
 
-``javascript
-// This is our component
-const GameNews = {
-    newsList: [],
-    loadList: function() {
-        m.request({
-                url: 'http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/',
-                data: { appid: 241930, name: "Middle Earth: Shadow of War" }
-            })
-            .then(function(result) {
-                GameNews.newsList = result.appnews.newsitems
-            })
-            .catch(error => console.log(error.message))
+```javascript
+// src/views/game-news-list.js
+import m from 'mithril';
+import { news } from './news';
+
+const gameNewsList = {
+    view() {
+        return m(".game-news-list",
+            m("h1", "List of Game News"),
+            m("img[alt='Game art'][src='http://cdn.wccftech.com/wp-content/uploads/2017/02/Middle-Earth-Shadow-of-War-Art.png']", {style: {"width": "258px", "height": "228px"}}),
+            news() && news().length > 0 ?
+            news().map(
+                newsItem => m(".newsItem", newsItem.title)
+            ) :
+            m(".loading", "Loading game news list...")
+        );
+    }
+};
+
+export default gameNewsList;
+```
+
+Mithril treats components as objects with view methods. Another thing you can do is to use the `getElementByID` method and then use it to tie into an HTML tag.  If you want to try a nice tool using this approach, Arthur Clemens made a [tool](http://arthurclemens.github.io/mithril-template-converter/index.html) that will turn HTML into Mithril JS.  Now we have the basic structure set up for a list of news items.  We now need to get the data to populate it.
+
+We will also want to be able to handle the state of our game news list changing at unpredictable times when someone publishes an article about it.  
+
+Let's create a file called `news.js`:
+
+```javascript
+//src/views/news.js
+import m from 'mithril';
+import stream from 'mithril/stream';
+
+export const news = stream([]);
+
+var News = {
+    oninit: function(vnode) {
+        this.data = vnode.attrs.data
+        m.request({ url: 'http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=241930&count=3&maxlength=300&format=json' }).then(data => {
+            this.data = data
+        })
+    },
+    view: function() {
+        return m("li", this.data)
     }
 }
-m.mount(document.body, {
-    oninit: () => GameNews.loadList(),
-    view: () => [
-        m('h1', 'Middle Earth: Shadow of War News'),
-        m("ul",
-            m("li.newsitem", [
-                m(".title",
-                    "Title"
-                ),
-                m(".contents",
-                    "Contents"
-                )
-            ])
-        )
-    ]
-})
-``
 
-Mithril treats components as objects with view methods. Another thing you can do is to use the `getElementByID` method and then use it to tie into an HTML tag.  If you want to try a nice tool using this approach, Arthur Clemens made a [tool](http://arthurclemens.github.io/mithril-template-converter/index.html) that will turn HTML into Mithril JS.  Now we have the basi structure set up for a list of news items.  We now need to get the data to populate it.
+m(News, { data: this.data })
+```
 
-The method from the Steam API we will be using in this app will be the GetNewsForApp one and the app id for the Middle Earth: Shadow of War game is 241930.  We can check it against this [url](http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=241930&count=5&maxlength=300&format=json) to see that things are correct. Let's do a quick test using [cors](https://cors.now.sh/)  to see what we get with what we have so far:
+It's looking better already.  The method from the Steam API we will be using in this app will be the GetNewsForApp one and the app id for the Middle Earth: Shadow of War is 241930.  We can check it against this [url](http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=241930&count=5&maxlength=300&format=json) to see that things are correct. 
 
-``javascript
-// This is our component
-const cors = 'https://cors.now.sh/'
-const GameNews = {
-    newsList: [],
-    loadList: function() {
-        m.request({
-                url: cors + 'http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/',
-                data: { appid: 241930, name: "Middle Earth: Shadow of War" }
-            })
-            .then(function(result) {
-                GameNews.newsList = result.appnews.newsitems
-            })
-            .catch(error => console.log(error.message))
-    }
-}
-m.mount(document.body, {
-    oninit: () => GameNews.loadList(),
-    view: () => [
-        m("h1",
-            "Mithril's Shadow of Mordor Game News"
-        ),
-        m("ul", [
-            GameNews.newsList.map(n => m('ul', n.title))
-        ])
-    ]
-})``
-
-Well, it works, but it can be prettier and more efficient and then of course we need to do real API calls. We at least know roughly what we will get when we set up the endpoints properly. 
-
-### API
-
-Mithril has requests handled using [XHR](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest).  The requests are set up like [this](https://mithril.js.org/request.html).  `promise = m.request([url,] options)` is along the lines of what we will need and is consistent with how you're used to getting these.
 
 ### Styling
 Now that we have what we need from Steam, it's time to make this look nicer and become responsive.  
 
-Let's get the header looking better first.  We will start out by making the letters become white and giving the background a lovely shade from the Shire with a palette from the [Google Material Design guidelines](https://material.io/guidelines/style/color.html#color-color-palette) which were expertly put together to help websites have good color combinations.
+We will start out by making the the header become a navbar with a palette from the [Google Material Design guidelines](https://material.io/guidelines/style/color.html#color-color-palette).  Let's go with something indigo.
 
-Let's also make the list of news titles become a list group since that will look much nicer as well as use the Bootstrap responsiveness. You can change it all over from the HTML to the Mithril using the converter I shared earlier to make this faster.
+This app can really use a nav bar where the header is.  Delette the header from the `game-news-list.js` file since we are going to make this a navbar instead.  Let's take care of the navbar component:
 
-``
+```javascript
+// src/views/navbar.js
+import m from 'mithril';
 
-After this we can make the news list look a little nicer too as well.
-
-``js
-m.mount(document.body, {
-    oninit: () => GameNews.loadList(),
-    view: () => [
-        m("h1", { class: "GameHeader" },
-            "Mithril's Shadow of Mordor Game News"
-        ),
-        m("ul.list-group",
-            m("li.list-group-item", { class: "GameGroup" },[
-                GameNews.newsList.map(n => m('li', n.title))
+const navbar = {
+    view: vnode =>
+      m("nav.navbar.navbar-default",
+        m(".container-fluid", [
+          m(".navbar-header", [
+            m("button.navbar-toggle.collapsed[aria-controls='navbar'][aria-expanded='false'][data-target='#navbar'][data-toggle='collapse'][type='button']", [
+              m("span.sr-only",
+                "Toggle navigation"
+              ),
+              m("span.icon-bar"),
+              m("span.icon-bar"),
+              m("span.icon-bar")
+            ]),
+            m("a.navbar-brand[href='#']",
+              "Middle Earth: Shadow of War Game News"
+            ),
+          ]),
+          m(".navbar-collapse.collapse[id='navbar']", [
+            m("ul.nav.navbar-nav", [
+              m("li.active",
+                m("a[href='#']",
+                  "User"
+                )
+              )
             ])
-        )
+          ])
+        ])
+      )
+  }
+  
+  m.mount(document.body, {
+    view: () => [
+      m(navbar),
+      m('h1', 'Some other content')
     ]
-})
-``
+  })
+  export default navbar;
 
-``css
-body, {
-    font: normal 16px Verdana;
-    margin: 0;
-}
-.GameHeader {
-    color: #FFFFFF;
-    background-color: #3F51B5;
-}
-.GameNewsList {
-    background-color: #9FA8DA;
-}
-``
-
-Please note that some of the CSS you will have to manually tinker with them such as for list groups.  It's all in how the virtual HTML is working.
+```
 
 
 ### Authentication
@@ -205,16 +198,22 @@ The final parts of our work will be to add authentication. This will help with a
 Let's go the the [Auth0 dashboard](https://manage.auth0.com/#/) to begin. We want to start by setting up the client.
 
 1. Click on the client menu part of the dashboard and you will want to choose the single page web applications option.  YOu will also have to name the application.  After you choose the single page option, click on "Create".
+
 2. You will be prompted to choose a technology, so choose "JavaScript".  Mithril isn't on there right now, but since it uses pure JavaScript, it will process well.
+
 3. The next thing that needs to be set are the callback parameters.  `http://localhost:3000` is what you will want to put into the Allowed Callback URLs.  The same goes for the Allowed Origins.
-4. Since we are going to be dealing with JSON, we will need to then use a JsonWebToken Algorithm.  To do this, scroll to the bottom of your settings to get to the advanced settings.  Select the OAuth tab and then verify that the algorithm is set to `RS256`.  If not, click on the dropdown and select R256.  
+
+4. Since we are going to be dealing with JSON, we will need to then use a JsonWebToken Algorithm.  To do this, scroll to the bottom of your settings to get to the advanced settings.  Select the OAuth tab and then verify that the algorithm is set to `RS256`.  If not, click on the dropdown and select R256. 
+ 
 5. If you want to use a social connection such as your GitHub account, you can do that on the left at the connctions menu and toggle the connections you would like to use.
-5. Now we will need to set up an API.  On the upper right-hand corner where your account icon is, click on the menu arrow and select Settings. You can fill in your company information and then the API authorization settings.  Click Save so your changes are kept.
-6. Go back to the left menu and click on the "Create API" button. Enter a name for the API. Set the Identifier to your API endpoint URL. You can use something like `localhost:3030/api/`. The Signing Algorithm should be RS256 as we set earlier.  Please note that you are advised to set up protection for your Node API.  The routes we have set don't have protection yet, so you can keep everything secure by making an Authorization header.  You can view how to do this by checking out the Node example on the [Quick Start](https://auth0.com/docs/quickstart/backend/nodejs).
+
+6. Now we will need to set up an API.  On the upper right-hand corner where your account icon is, click on the menu arrow and select Settings. You can fill in your company information and then the API authorization settings.  Click Save so your changes are kept.
+
+7. Go back to the left menu and click on the "Create API" button. Enter a name for the API. Set the Identifier to your API endpoint URL. You can use something like `localhost:3030/api/`. The Signing Algorithm should be RS256 as we set earlier.  Please note that you are advised to set up protection for your Node API.  The routes we have set don't have protection yet, so you can keep everything secure by making an Authorization header.  You can view how to do this by checking out the Node example on the [Quick Start](https://auth0.com/docs/quickstart/backend/nodejs).
 
 It's time to head back into into our work and add the authentication logic.  Install [auth0-js] (https://github.com/auth0/auth0.js) with the `npm install auth0-js --save` command.
 
-DLet's dive into our `index.js` file we have been working with and get the logic set up into two components.  Start out by importing Auth0: `import auth0 from 'auth0-js';`.
+Let's dive into our `index.js` file we have been working with and get the logic set up into two components.  Start out by importing Auth0: `import auth0 from 'auth0-js';`.
 
 
 Now let's create a new component for a login.
