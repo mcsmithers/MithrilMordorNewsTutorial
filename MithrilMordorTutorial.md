@@ -142,8 +142,6 @@ It's looking better already.  The method from the Steam API we will be using in 
 ### Styling
 Now that we have what we need from Steam, it's time to make this look nicer and become responsive.  
 
-We will start out by making the the header become a navbar with a palette from the [Google Material Design guidelines](https://material.io/guidelines/style/color.html#color-color-palette).  Let's go with something indigo.
-
 This app can really use a nav bar where the header is.  Delette the header from the `game-news-list.js` file since we are going to make this a navbar instead.  Let's take care of the navbar component:
 
 ```javascript
@@ -188,6 +186,48 @@ const navbar = {
   })
   export default navbar;
 
+```
+
+Import the navbar component and call it up with `m(navbar)` in `game-news-list.js` and `index.js` inside the `view` function.  It is starting to look appealing, but we should change the styling some more to give it a modern look (and maybe a touch of Mordor).  The header became a navbar, so let's add an indigo palette from the [Google Material Design guidelines](https://material.io/guidelines/style/color.html#color-color-palette).  We can also make some elements have a little padding so the page looks nicer.
+
+```css
+body {
+   background-color: #E8EAF6; 
+}
+
+img {
+    padding: 15px 15px;
+}
+
+.container-fluid {
+    background-color: #3F51B5;
+    color: #E8EAF6;
+}
+
+.container-fluid {
+}
+
+.navbar-brand {
+    color: #E8EAF6;
+}
+
+.loading {
+    padding: 15px 15px 15px 15px;
+    background-color: #E8EAF6;
+}
+
+.navbar-default, .navbar-brand {
+    background-color: #3F51B5;
+}
+
+.navbar>.container-fluid .navbar-brand {
+    margin-left: -15px;
+    color: #E8EAF6;
+}
+
+.navbar-collapse.collapse{
+    background-color: #3F51B5;
+}
 ```
 
 

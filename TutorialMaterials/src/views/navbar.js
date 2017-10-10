@@ -17,15 +17,6 @@ const navbar = {
             m("a.navbar-brand[href='#']",
               "Middle Earth: Shadow of War Game News"
             ),
-          ]),
-          m(".navbar-collapse.collapse[id='navbar']", [
-            m("ul.nav.navbar-nav", [
-              m("li.active",
-                m("a[href='#']",
-                  "Menu"
-                )
-              )
-            ])
           ])
         ])
       )

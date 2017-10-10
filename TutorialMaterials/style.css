@@ -1,16 +1,37 @@
 body {
-	background: #C5CAE9 0 0 repeat;
+   background-color: #E8EAF6; 
 }
 
-h1 {
-	color: #FFF;
-	background-color: #3F51B5;
+img {
+    padding: 15px 15px;
 }
 
-.GameNewsList a {
-	color: 	#000000;
-    cursor: pointer;
-    font-weight: bold;
-    text-decoration: underline;
-    background: transparent;
+.container-fluid {
+    background-color: #3F51B5;
+    color: #E8EAF6;
+}
+
+.container-fluid {
+}
+
+.navbar-brand {
+    color: #E8EAF6;
+}
+
+.loading {
+    padding: 15px 15px 15px 15px;
+    background-color: #E8EAF6;
+}
+
+.navbar-default, .navbar-brand {
+    background-color: #3F51B5;
+}
+
+.navbar>.container-fluid .navbar-brand {
+    margin-left: -15px;
+    color: #E8EAF6;
+}
+
+.navbar-collapse.collapse{
+    background-color: #3F51B5;
 }
