@@ -4,6 +4,7 @@ import stream from 'mithril/stream';
 
 export const news = stream([]);
 
+
 const cors = 'https://cors.now.sh/'
 
 const News = {
