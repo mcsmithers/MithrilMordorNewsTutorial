@@ -1,17 +1,20 @@
 body {
-   background-color: #E8EAF6; 
+    background-color: #1A237E;
 }
 
 img {
-    padding: 15px 15px;
+    padding: 15px 15px 15px 15px;
+    vertical-align: middle;
+    width: auto;
+    height: auto;
+    display: block;
+    margin: auto;
 }
 
 .container-fluid {
+    max-block-size: 600px;
     background-color: #3F51B5;
     color: #E8EAF6;
-}
-
-.container-fluid {
 }
 
 .navbar-brand {
@@ -20,10 +23,18 @@ img {
 
 .loading {
     padding: 15px 15px 15px 15px;
+    margin: 15px 15px;
     background-color: #E8EAF6;
 }
 
-.navbar-default, .navbar-brand {
+.newsItem {
+    padding: 15px 15px 15px 15px;
+    margin: 15px 15px;
+    background-color: #E8EAF6;
+}
+
+.navbar-default,
+.navbar-brand {
     background-color: #3F51B5;
 }
 
@@ -32,6 +43,16 @@ img {
     color: #E8EAF6;
 }
 
-.navbar-collapse.collapse{
+.navbar-collapse.collapse {
     background-color: #3F51B5;
+}
+
+.btn-primary-outline {
+    background-color: transparent;
+    border-color: #ccc;
+    align: right;
+    position: absolute;
+    right: 0px;
+    width: 100px;
+    padding: 10px;
 }

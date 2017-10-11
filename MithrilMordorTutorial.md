@@ -63,21 +63,14 @@ m.mount(document.body, App);
 
 Which gives us this as a result:
 
-
-{% highlight html %}
-{% raw %}
-
-{{<html>
+<html>
 	<head>
 	    <title>Hello Mithril</title>
 	</head>
 	  <body>
 	    <script src="bin/app.js"></script>
 	  </body>
-</html>}}
-
-{% endraw %}
-{% endhighlight %}
+</html>
 
 
 Not bad, eh? Almost time to make this app do cool stuff. You may have noticed the "m" object in the code. That's Mithril being called so it automatically figures out what we are doing. As we add the rest of our app, you will see why this is awesome. Now that we have the landing page ready, it is time to make the app work.  We will want to make a module to store the state of a game's news, so inside `src` directory, make a models directory.  This is where the [components](https://mithril.js.org/components.html) will live.
@@ -89,13 +82,18 @@ Let's now start making this app do something by adding a file named `game-news-l
 ```javascript
 // src/views/game-news-list.js
 import m from 'mithril';
-import { news } from './news';
+import navbar from './navbar';
+import {
+    news
+} from './news';
 
 const gameNewsList = {
     view() {
         return m(".game-news-list",
-            m("h1", "List of Game News"),
-            m("img[alt='Game art'][src='http://cdn.wccftech.com/wp-content/uploads/2017/02/Middle-Earth-Shadow-of-War-Art.png']", {style: {"width": "258px", "height": "228px"}}),
+            m(navbar),
+            m(".container-fluid",
+                m("img[alt='Game art'][src='http://cdn.wccftech.com/wp-content/uploads/2017/02/Middle-Earth-Shadow-of-War-Art.png']")
+            ),
             news() && news().length > 0 ?
             news().map(
                 newsItem => m(".newsItem", newsItem.title)
@@ -147,64 +145,59 @@ This app can really use a nav bar where the header is.  Delette the header from 
 ```javascript
 // src/views/navbar.js
 import m from 'mithril';
+import loginButton from './login-button'
 
 const navbar = {
-    view: vnode =>
-      m("nav.navbar.navbar-default",
-        m(".container-fluid", [
-          m(".navbar-header", [
-            m("button.navbar-toggle.collapsed[aria-controls='navbar'][aria-expanded='false'][data-target='#navbar'][data-toggle='collapse'][type='button']", [
-              m("span.sr-only",
-                "Toggle navigation"
-              ),
-              m("span.icon-bar"),
-              m("span.icon-bar"),
-              m("span.icon-bar")
-            ]),
-            m("a.navbar-brand[href='#']",
-              "Middle Earth: Shadow of War Game News"
+  view: vnode =>
+    m("nav.navbar.navbar-default",
+      m(".container-fluid", [
+        m(".navbar-header", [
+          m("button.navbar-toggle.collapsed[aria-controls='navbar'][aria-expanded='false'][data-target='#navbar'][data-toggle='collapse'][type='button']", [
+            m("span.sr-only",
+              "Toggle navigation"
             ),
+            m("span.icon-bar"),
+            m("span.icon-bar"),
+            m("span.icon-bar")
           ]),
-          m(".navbar-collapse.collapse[id='navbar']", [
-            m("ul.nav.navbar-nav", [
-              m("li.active",
-                m("a[href='#']",
-                  "User"
-                )
-              )
-            ])
-          ])
+          m("a.navbar-brand[href='#']",
+            "Middle Earth: Shadow of War Game News"
+          ),
+          m(loginButton)
         ])
-      )
-  }
-  
-  m.mount(document.body, {
-    view: () => [
-      m(navbar),
-      m('h1', 'Some other content')
-    ]
-  })
-  export default navbar;
+      ]),
+    )
+}
 
+m.mount(document.body, {
+  view: () => [
+    m(navbar)
+  ]
+})
+export default navbar;
 ```
 
-Import the navbar component and call it up with `m(navbar)` in `game-news-list.js` and `index.js` inside the `view` function.  It is starting to look appealing, but we should change the styling some more to give it a modern look (and maybe a touch of Mordor).  The header became a navbar, so let's add an indigo palette from the [Google Material Design guidelines](https://material.io/guidelines/style/color.html#color-color-palette).  We can also make some elements have a little padding so the page looks nicer.
+Import the navbar component and call it up with `m(navbar)` in `game-news-list.js` and `index.js` inside the `view` function.  It is starting to look appealing, but we should change the styling some more to give it a modern look (and maybe a touch of Mordor).  The header became a navbar, so let's add an indigo palette from the [Google Material Design guidelines](https://material.io/guidelines/style/color.html#color-color-palette).  We can also make some elements have a little padding so the page looks nicer.  We'll put it in the same level as the `index.html` and simply call it `style.css`.
 
 ```css
+/*style.css*/
 body {
-   background-color: #E8EAF6; 
+    background-color: #1A237E;
 }
 
 img {
-    padding: 15px 15px;
+    padding: 15px 15px 15px 15px;
+    vertical-align: middle;
+    width: auto;
+    height: auto;
+    display: block;
+    margin: auto;
 }
 
 .container-fluid {
+    max-block-size: 600px;
     background-color: #3F51B5;
     color: #E8EAF6;
-}
-
-.container-fluid {
 }
 
 .navbar-brand {
@@ -213,10 +206,18 @@ img {
 
 .loading {
     padding: 15px 15px 15px 15px;
+    margin: 15px 15px;
     background-color: #E8EAF6;
 }
 
-.navbar-default, .navbar-brand {
+.newsItem {
+    padding: 15px 15px 15px 15px;
+    margin: 15px 15px;
+    background-color: #E8EAF6;
+}
+
+.navbar-default,
+.navbar-brand {
     background-color: #3F51B5;
 }
 
@@ -225,7 +226,7 @@ img {
     color: #E8EAF6;
 }
 
-.navbar-collapse.collapse{
+.navbar-collapse.collapse {
     background-color: #3F51B5;
 }
 ```
@@ -255,5 +256,37 @@ It's time to head back into into our work and add the authentication logic.  Ins
 
 Let's dive into our `index.js` file we have been working with and get the logic set up into two components.  Start out by importing Auth0: `import auth0 from 'auth0-js';`.
 
+### Implement Authentication
+Now let's create a new component for a login by making a button and call it `login-button.js`.  Once you have that, import it into the `navbar,js` file right outside the `container-fluid` class.  We will style it as well in the same style file as the other styling we have done.
 
-Now let's create a new component for a login.
+```javascript
+//src/views/login-button.css
+import m from 'mithril';
+
+const loginButton = {
+    view: vnode =>
+    m("button.btn.btn-primary-outline[type='button']", 
+    "Login"
+  )
+  }
+  
+  m.mount(document.body, {
+    view: () => [
+      m(loginButton)
+    ]
+  })
+
+  export default loginButton;
+```
+
+```css
+.btn-primary-outline {
+    background-color: transparent;
+    border-color: #ccc;
+    align: right;
+    position: absolute;
+    right: 0px;
+    width: 100px;
+    padding: 10px;
+  }
+```

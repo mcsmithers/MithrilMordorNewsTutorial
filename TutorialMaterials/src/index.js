@@ -2,13 +2,15 @@
 import m from 'mithril';
 import gameNewsList from './views/game-news-list';
 import navbar from './views/navbar';
+import loginButton from './views/login-button';
 
 const App = {
-    view: function(){
+    view: function () {
         return ('.container',
             m('h1', 'Hello Mithril'),
             m(navbar),
-            m(gameNewsList)
+            m(loginButton),
+            m(news)
         );
     }
 };
