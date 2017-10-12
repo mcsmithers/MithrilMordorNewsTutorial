@@ -1,5 +1,5 @@
 # Learn MithrilJS: Build a Game News App with Authentication
-![Mithril logo](https://mithril.js.org/logo.svg "Mithril Logo")
+![Mithril logo](./logo.jpg "Mithril Logo")
 
 
 ## TL;DR:  

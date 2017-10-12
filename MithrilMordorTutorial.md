@@ -1,5 +1,5 @@
 # Learn MithrilJS: Build a Game News App with Authentication
-![Mithril logo](https://mithril.js.org/logo.svg "Mithril Logo")
+![Mithril logo](./logo.jpg "Mithril Logo")
 
 
 ## TL;DR:  
@@ -146,7 +146,7 @@ It's looking better already.  The method from the Steam API we will be using in 
 ### Styling
 Now that we have what we need from Steam, it's time to make this look nicer and become responsive.  
 
-This app can really use a navbar where the header is.  Delette the header from the `game-news-list.js` file since we are going to make this a navbar instead.  Let's take care of the navbar component:
+This app can really use a navbar where the header is.  Delete the header from the `game-news-list.js` file since we are going to make this a navbar instead.  Let's take care of the navbar component:
 
 ```javascript
 // src/views/navbar.js
