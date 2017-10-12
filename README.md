@@ -39,7 +39,7 @@ As developers, we value a good production app and minify things where we can so 
 
 For styling, we will use [Bootstrap](http://getbootstrap.com/). For this tutorial, I am going to use a CDN. If you want a local installation, run `npm install bootstrap -g` to make Bootstrap global on your system and then import it in the `index.js` file.
 
-We will use the [Steam  Web API](https://developer.valvesoftware.com/wiki/Steam_Web_API).  If you don't have a Steam account already, it is free as is the API.  If you already have an account, sign in first.  Once you are logged into an account, you can get a key from [here](https://steamcommunity.com/dev/apikey).
+We will use the [Steam  Web API](https://developer.valvesoftware.com/wiki/Steam_Web_API).  If you don't have a Steam account already, it is free as is the API.  If you already have an account, sign in first.  Once you are logged into an account, you can get a key from [here](https://steamcommunity.com/dev/apikey).  We will use the [CORS](ttps://cors.now.sh) tool to help the Steam API to work without needing a server.
 
 
 ### Scaffolding
@@ -51,10 +51,9 @@ Now it is time to get the skeleton parts made. Mithril uses HTML5, so you won't 
 import m from 'mithril';
 
 const App = {
-    view: function() {
+    view: function () {
         return ('.container',
             m('h1', 'Hello Mithril'),
-            m(gameNewsList)
         );
     }
 };
@@ -83,22 +82,28 @@ Let's now start making this app do something by adding a file named `game-news-l
 // src/views/game-news-list.js
 import m from 'mithril';
 import navbar from './navbar';
-import {
+import { 
     news
 } from './news';
 
+const url = 'https://cors.now.sh/http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=241930&count=3&maxlength=300&format=json';
+
 const gameNewsList = {
+    oninit() {
+        m.request(url).then(data => {
+            this.data = data;
+            console.log(this.data);
+        });
+    },
     view() {
         return m(".game-news-list",
             m(navbar),
             m(".container-fluid",
                 m("img[alt='Game art'][src='http://cdn.wccftech.com/wp-content/uploads/2017/02/Middle-Earth-Shadow-of-War-Art.png']")
             ),
-            news() && news().length > 0 ?
-            news().map(
-                newsItem => m(".newsItem", newsItem.title)
-            ) :
-            m(".loading", "Loading game news list...")
+            this.data
+                ? this.data.appnews.newsitems.map(newsItem => m(".newsItem", newsItem.title))
+                : m(".loading", "Loading game news list...")
         );
     }
 };
@@ -119,19 +124,19 @@ import stream from 'mithril/stream';
 
 export const news = stream([]);
 
-var News = {
-    oninit: function(vnode) {
-        this.data = vnode.attrs.data
-        m.request({ url: 'http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=241930&count=3&maxlength=300&format=json' }).then(data => {
-            this.data = data
-        })
+const cors = 'https://cors.now.sh/'
+
+const News = {
+    oninit: function(){
+        m.request(cors + 'http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=241930&count=3&maxlength=300&format=json')
+            .then(data => {
+                this.data = data
+            })
     },
-    view: function() {
-        return m("li", this.data)
+    view: function(){
+        return m("li", JSON.stringify(this.data, undefined, 2))
     }
 }
-
-m(News, { data: this.data })
 ```
 
 It's looking better already.  The method from the Steam API we will be using in this app will be the GetNewsForApp one and the app id for the Middle Earth: Shadow of War is 241930.  We can check it against this [url](http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=241930&count=5&maxlength=300&format=json) to see that things are correct. 
@@ -145,36 +150,31 @@ This app can really use a nav bar where the header is.  Delette the header from 
 ```javascript
 // src/views/navbar.js
 import m from 'mithril';
-import loginButton from './login-button'
+import loginButton from './login-button';
 
 const navbar = {
-  view: vnode =>
-    m("nav.navbar.navbar-default",
-      m(".container-fluid", [
-        m(".navbar-header", [
-          m("button.navbar-toggle.collapsed[aria-controls='navbar'][aria-expanded='false'][data-target='#navbar'][data-toggle='collapse'][type='button']", [
-            m("span.sr-only",
-              "Toggle navigation"
+    view: vnode =>
+      m("nav.navbar.navbar-default",
+        m(".container-fluid", [
+          m(".navbar-header", [
+            m("button.navbar-toggle.collapsed[aria-controls='navbar'][aria-expanded='false'][data-target='#navbar'][data-toggle='collapse'][type='button']", [
+              m("span.sr-only",
+                "Toggle navigation"
+              ),
+              m("span.icon-bar"),
+              m("span.icon-bar"),
+              m("span.icon-bar")
+            ]),
+            m("a.navbar-brand[href='#']",
+              "Middle Earth: Shadow of War Game News"
             ),
-            m("span.icon-bar"),
-            m("span.icon-bar"),
-            m("span.icon-bar")
           ]),
-          m("a.navbar-brand[href='#']",
-            "Middle Earth: Shadow of War Game News"
-          ),
           m(loginButton)
         ])
-      ]),
-    )
-}
+      )
+  }
 
-m.mount(document.body, {
-  view: () => [
-    m(navbar)
-  ]
-})
-export default navbar;
+  export default navbar;
 ```
 
 Import the navbar component and call it up with `m(navbar)` in `game-news-list.js` and `index.js` inside the `view` function.  It is starting to look appealing, but we should change the styling some more to give it a modern look (and maybe a touch of Mordor).  The header became a navbar, so let's add an indigo palette from the [Google Material Design guidelines](https://material.io/guidelines/style/color.html#color-color-palette).  We can also make some elements have a little padding so the page looks nicer.  We'll put it in the same level as the `index.html` and simply call it `style.css`.
@@ -234,59 +234,77 @@ img {
 
 ### Authentication
 
-The final parts of our work will be to add authentication. This will help with authentication for secured endpoints.  
+The final parts of our work will be to add authentication. We will do this with a hosted login page.  As developers, we are challenged with finding the most secure solutions possible in our work. It's arguably now becoming equally important as solid back-end logic and a good user interface.  Another challenge to us as developers is to make authentication easy on the user yet deliver effective security. To get started on the hosted login, we will do this with the Auth0 Hosted Login page.  
 
-Let's go the the [Auth0 dashboard](https://manage.auth0.com/#/) to begin. We want to start by setting up the client.
+The Hosted Login Page is easily customizable right from the Dashboard. By default, the Hosted Login Page uses Auth0's Lock Widget to authenticate your users, but the code of the Hosted Login Page can be customized to replace Lock with the Lock Passwordless widget, or an entirely custom UI can be built in its place, using the Auth0.js SDK for authentication if you want to explore those further.
 
-1. Click on the client menu part of the dashboard and you will want to choose the single page web applications option.  YOu will also have to name the application.  After you choose the single page option, click on "Create".
+1.  Let's go the the [Auth0 dashboard](https://manage.auth0.com/#/) to begin. In the Dashboard, you can enable a custom Hosted Login Page by navigating to the left-hand menu and selecting the Hosted Pages menu. Toggle the switch to to enable a login page. 
 
-2. You will be prompted to choose a technology, so choose "JavaScript".  Mithril isn't on there right now, but since it uses pure JavaScript, it will process well.
+2.  Next we will choose the technology we want to use. You will have three options to use the hosted page; Lock, Lock Passwordless, and Auth0.js v8 which involves using the SDK.  We will be using the Lock.  For your reference, here's the breakdown of each one:
 
-3. The next thing that needs to be set are the callback parameters.  `http://localhost:3000` is what you will want to put into the Allowed Callback URLs.  The same goes for the Allowed Origins.
+* Lock - This is the easiest route to utilize the hosted pages.  It's prebuilt and customizable that easily allows the users to login.
+* Lock Passwordless - The Lock Passwordless is similar to the Lock in its UI.  Where it differs is that instead of offering options to the user, it will ask the user for an email or number to receive SMS messages to authenticate without paswords.
+* Auth0.js v8 - Auth0.js is the SDK used for interacting with the Auth0 authentication API. This is the option you would choose for anything requiring special handling and where more than logins are needed for your applications.
 
-4. Since we are going to be dealing with JSON, we will need to then use a JsonWebToken Algorithm.  To do this, scroll to the bottom of your settings to get to the advanced settings.  Select the OAuth tab and then verify that the algorithm is set to `RS256`.  If not, click on the dropdown and select R256. 
- 
-5. If you want to use a social connection such as your GitHub account, you can do that on the left at the connctions menu and toggle the connections you would like to use.
+3.  After you toggle the switch, you will have noticed an interactive text editor become activated.   Since we are using Lock, we can alter modify the page in the editor for how it looks and interacts. One thing to keep in mind is the Hosted Login Page customizations run per tenant. There's many options to run multiple clients, but for this tutorial, we will keep to just one for now.
 
-6. Now we will need to set up an API.  On the upper right-hand corner where your account icon is, click on the menu arrow and select Settings. You can fill in your company information and then the API authorization settings.  Click Save so your changes are kept.
+4.  [Customization Options](https://auth0.com/docs/hosted-pages/login#1-enable-the-hosted-login-page) - You can customize the Hosted Login Page inside the editot. Using Lock, ywe can change its appearance and behaviors to suit our needs.  All changes to the page's appearance and/or behavior will apply to all users shown this login page, regardless of the client or connection. Let's discuss the different parameters we can tailor:
 
-7. Go back to the left menu and click on the "Create API" button. Enter a name for the API. Set the Identifier to your API endpoint URL. You can use something like `localhost:3030/api/`. The Signing Algorithm should be RS256 as we set earlier.  Please note that you are advised to set up protection for your Node API.  The routes we have set don't have protection yet, so you can keep everything secure by making an Authorization header.  You can view how to do this by checking out the Node example on the [Quick Start](https://auth0.com/docs/quickstart/backend/nodejs).
+* Query String Parameters - You can add query string parameters to the URL you are using to call your Hosted Login Page from your application, and use those items to customize its behavior or appearance.
+* Parameters for the Authorize Endpoint - This is where you will put in the endpoint for your app whether you decide to use `Auth0.js` or call the endpoint directly.
+* Login Hint - If you want, you can allow login hints
+* Callback URL - Once the user is authenticated, this is were they will get directed
 
-It's time to head back into into our work and add the authentication logic.  Install [auth0-js] (https://github.com/auth0/auth0.js) with the `npm install auth0-js --save` command.
-
-Let's dive into our `index.js` file we have been working with and get the logic set up into two components.  Start out by importing Auth0: `import auth0 from 'auth0-js';`.
+Let's give this app a title of `Mithril Game News App`, then call the endpoint directly, skip login hints, and then set the callback URL to `localhost:3000`.
 
 ### Implement Authentication
-Now let's create a new component for a login by making a button and call it `login-button.js`.  Once you have that, import it into the `navbar,js` file right outside the `container-fluid` class.  We will style it as well in the same style file as the other styling we have done.
+Now we can create a new component for a login by making a button and call it `login-button.js`.  Once you have that, import it into the `navbar,js` file right outside the `container-fluid` class.  We will style it as well in the same style file as the other styling we have done.
 
 ```javascript
-//src/views/login-button.css
+//src/viewslogin-button.css
 import m from 'mithril';
 
 const loginButton = {
-    view: vnode =>
-    m("button.btn.btn-primary-outline[type='button']", 
-    "Login"
+  view: vnode =>
+  m("a.btn.btn-secondary.btn-lg.active[href='https://csmithers.auth0.com/login?client=2ecADhMHDzAUsVJIXUJAxeI1wreBxbno']", 
+  "Login"
   )
-  }
-  
-  m.mount(document.body, {
-    view: () => [
-      m(loginButton)
-    ]
-  })
+}
 
-  export default loginButton;
+export default loginButton;
 ```
 
 ```css
-.btn-primary-outline {
+/*style.css*/
+.a.btn.btn-secondary.btn-lg.active {
     background-color: transparent;
-    border-color: #ccc;
+    color: #E8EAF6;
+    border-color: #E8EAF6;
     align: right;
     position: absolute;
     right: 0px;
     width: 100px;
     padding: 10px;
-  }
+}
 ```
+
+### Routing
+Now that we have implemented the login page, we also need to get it routed properly.  
+
+```javascript
+// models/Auth.js
+var Component = {
+    view: function() {
+      return m('div', 'Route to home: ', m.route.get());
+    }
+  };
+```
+
+Now our app is all done with authentication.  It uses a secure login that is easy to configure and works speedily.
+
+### Conclusion
+In this tutorial we were introduced to the Mithril JS framework. We got to explore the ease in its use of a virtual DOM and how to create and update HTML.  We have created components that allowed us to make an app that talked to a server. We've demonstrated how simple it can be to perform routing for a single page application and finally authenticated a user. There are many more features that MithrilJS offers such as being a great way to learn functional programming.
+
+To learn more about the Mithril JS library, you can peruse the docs at [Mithril's website](mithriljs.org) or get in touch with the community and development team by checking out the [Mithril GitHub](https://github.com/MithrilJS/mithril.js) and [Mithril Gitter](https://gitter.im/mithriljs/mithril.js).
+
+If you are wonder how Mithril JS can help you as a JavaScript developer trying to improve performance in your web apps, check out Mithril. Regardless of experience level, Mithril is easy to pick up from the friendly documentation to the similarities it has with React frameworks. Hopefully you enjoyed this tutorial and are ready to bring Mithril to good use with your own web apps.
