@@ -29,7 +29,7 @@ We will begin the tutorial by setting up our tools we will be using. Without fur
 
 ### Dependencies
 
-Again, part of Mithril's beauty is that it frees you of a long list of dependencies so this will be brief. To start with, I will need to have [Node](https://nodejs.org/en/) installed on your system.   If you don't have it already, you can download it from their [website](https://nodejs.org/en/download/).  There are many ways to install Mithril on your system if you prefer [other](https://Mithril.js.org/installation.html) such as with Bower is you prefer that instead. We will use Webpack like the Mithril page does: `npm install mithril --save`, run `npm install webpack --save` and then `npm init --yes` to generate the `package.json` file. We will be using es6 syntax, so if you don't have [Babel](https://babeljs.io/blog/2015/10/31/setting-up-babel-6) set up you will want to do so.
+Again, part of Mithril's beauty is that it frees you of a long list of dependencies so this will be brief. To start with, I will need to have [Node](https://nodejs.org/en/) installed on your system.   If you don't have it already, you can download it from their [website](https://nodejs.org/en/download/).  There are many ways to install Mithril on your system if you prefer [other](https://Mithril.js.org/installation.html) such as with Bower is you prefer that instead. We will use Webpack like the Mithril page does: `npm install mithril --save`, run `npm install webpack --save` and then `npm init --yes` to generate the `package.json` file. We will be using es6 syntax, so if you don't have [Babel](https://babeljs.io/blog/2015/10/31/setting-up-babel-6) set up you will want to do so.  You will also need the [Babel Loader](https://github.com/babel/babel-loader).
 
 Using npm, we will use the `npm --install yes`. Update the package file to call up the script with `"start": "webpack src/index.js bin/app.js -d --watch"` in the scripts.
 
@@ -40,6 +40,9 @@ As developers, we value a good production app and minify things where we can so 
 For styling, we will use [Bootstrap](http://getbootstrap.com/). For this tutorial, I am going to use a CDN. If you want a local installation, run `npm install bootstrap -g` to make Bootstrap global on your system and then import it in the `index.js` file.
 
 We will use the [Steam  Web API](https://developer.valvesoftware.com/wiki/Steam_Web_API).  If you don't have a Steam account already, it is free as is the API.  If you already have an account, sign in first.  Once you are logged into an account, you can get a key from [here](https://steamcommunity.com/dev/apikey).  We will use the [CORS](ttps://cors.now.sh) tool to help the Steam API to work without needing a server.
+
+ Security is becoming arguably as important as a good interface, so with a hosted page login, we should be covered. The last piece we will add is authentication with Auth0 and [passport.js](https://github.com/auth0/passport-auth0) to use tokens for the login page. `npm install --save auth0-js` is what you need to install the Auth0 piece.  `npm install passport-auth0` is how we will install passport to handle the JSON tokens.  
+
 
 
 ### Scaffolding
@@ -304,7 +307,79 @@ a.btn.btn-secondary.btn-sm.active {
 }
 ```
 
+In order to have our login perform it is supposed to, we need to get our JSON web tokens (https://jwt.io/) to be accessible for the login.  To help us with that, we will use `Passport.js`.  The logic we have in here is from the library itself.  All you need to do is put in your Auth0 credentials. Let's make a file called `auth.js`:
+
+```javascript
+import passport from 'passport';
+import auth0 from 'auth0';
+
+var Auth0Strategy = require('passport-auth0'),
+    passport = require('passport');
+
+var strategy = new Auth0Strategy({
+   domain:       'domain.auth0.com',
+   clientID:     'your-client-id',
+   clientSecret: 'your-auth0-client-secret',
+   callbackURL:  'http://localhost:5000'
+  },
+  function(accessToken, refreshToken, extraParams, profile, done) {
+    return done(null, profile);
+  }
+);
+
+passport.use(strategy);
+
+app.get('/callback',
+passport.authenticate('auth0', { failureRedirect: '/login' }),
+function(req, res) {
+  if (!req.user) {
+    throw new Error('user null');
+  }
+  res.redirect("/");
+}
+);
+
+app.get('/login',
+passport.authenticate('auth0', {}), function (req, res) {
+res.redirect("/");
+});
+
+var express = require('express');
+var app = express();
+var jwt = require('express-jwt');
+var jwks = require('jwks-rsa');
+
+var port = process.env.PORT || 8080;
+
+var jwtCheck = jwt({
+    secret: jwks.expressJwtSecret({
+        cache: true,
+        rateLimit: true,
+        jwksRequestsPerMinute: 5,
+        jwksUri: "https://your-url.auth0.com/.well-known/jwks.json"
+    }),
+    audience: 'http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=241930&count=5&maxlength=300&format=json',
+    issuer: "https://user.auth0.com/",
+    algorithms: ['RS256']
+});
+
+app.use(jwtCheck);
+
+app.get('/authorized', function (req, res) {
+  res.send('Secured Resource');
+});
+
+app.listen(port);
+
+
+```
+
+
 ### Conclusion
+Congratulations, you did it!
+
+![Result](./finished-app.jpg)
+
 In this tutorial we were introduced to the Mithril JS framework. We got to explore the ease in its use of a virtual DOM and how to create and update HTML.  We have created components that allowed us to make an app that talked to a server. We've demonstrated how simple it can be to perform routing for a single page application and finally authenticated a user. There are many more features that MithrilJS offers such as being a great way to learn functional programming and the effortless routing.
 
 To learn more about the Mithril JS library, you can peruse the docs at [Mithril's website](mithriljs.org) or get in touch with the community and development team by checking out the [Mithril GitHub](https://github.com/MithrilJS/mithril.js) and [Mithril Gitter](https://gitter.im/mithriljs/mithril.js).
