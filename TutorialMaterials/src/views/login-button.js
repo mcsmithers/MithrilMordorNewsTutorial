@@ -3,9 +3,9 @@ import m from 'mithril';
 
 const loginButton = {
   view: vnode =>
-  m("a.btn.btn-secondary.btn-lg.active[href='https://csmithers.auth0.com/login?client=2ecADhMHDzAUsVJIXUJAxeI1wreBxbno']", 
-  "Login"
-  )
+    m("a.btn.btn-secondary.btn-sm.active[href='your auth0 url']",
+      "Login"
+    )
 }
 
 export default loginButton;

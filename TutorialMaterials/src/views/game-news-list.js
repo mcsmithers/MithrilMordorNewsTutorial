@@ -1,7 +1,7 @@
 // src/views/game-news-list.js
 import m from 'mithril';
 import navbar from './navbar';
-import { 
+import {
     news
 } from './news';
 
@@ -20,9 +20,9 @@ const gameNewsList = {
             m(".container-fluid",
                 m("img[alt='Game art'][src='http://cdn.wccftech.com/wp-content/uploads/2017/02/Middle-Earth-Shadow-of-War-Art.png']")
             ),
-            this.data
-                ? this.data.appnews.newsitems.map(newsItem => m(".newsItem", newsItem.title))
-                : m(".loading", "Loading game news list...")
+            this.data ?
+            this.data.appnews.newsitems.map(newsItem => m("a.newsItem[href='newsItem.url']", newsItem.title)) :
+            m(".loading", "Loading game news list...")
         );
     }
 };

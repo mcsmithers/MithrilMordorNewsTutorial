@@ -17,13 +17,6 @@ img {
     color: #E8EAF6;
 }
 
-.navbar-brand {
-    color: #E8EAF6;
-}
-
-a.navbar-brand{
-    color: #E8EAF6;
-}
 
 .loading {
     padding: 15px 15px 15px 15px;
@@ -32,6 +25,8 @@ a.navbar-brand{
 }
 
 .newsItem {
+    position: relative;
+    display: block;
     padding: 15px 15px 15px 15px;
     margin: 15px 15px;
     background-color: #E8EAF6;
@@ -40,18 +35,20 @@ a.navbar-brand{
 .navbar-default,
 .navbar-brand {
     background-color: #3F51B5;
+    color: #E8EAF6;
 }
 
 .navbar>.container-fluid .navbar-brand {
     margin-left: -15px;
-    color: a.btn.btn-secondary.btn-lg.activ;
+    color: #E8EAF6;
+    background-color: #3F51B5;
 }
 
 .navbar-collapse.collapse {
     background-color: #3F51B5;
 }
 
-.a.btn.btn-secondary.btn-lg.active {
+a.btn.btn-secondary.btn-sm.active {
     background-color: transparent;
     color: #E8EAF6;
     border-color: #E8EAF6;
