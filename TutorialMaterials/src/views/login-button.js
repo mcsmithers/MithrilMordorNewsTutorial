@@ -3,15 +3,11 @@ import m from 'mithril';
 
 const loginButton = {
   view: vnode =>
-    m("button.btn.btn-primary-outline[type='button']",
-      "Login"
-    )
+  m("a.btn.btn-secondary.btn-lg.active[aria-pressed='true'][href='https://csmithers.auth0.com/login?client=2ecADhMHDzAUsVJIXUJAxeI1wreBxbno'][role='button']", 
+  "Login"
+  )
 }
 
-m.mount(document.body, {
-  view: () => [
-    m(loginButton)
-  ]
-})
+
 
 export default loginButton;

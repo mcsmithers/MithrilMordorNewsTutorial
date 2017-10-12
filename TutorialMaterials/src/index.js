@@ -10,7 +10,7 @@ const App = {
             m('h1', 'Hello Mithril'),
             m(navbar),
             m(loginButton),
-            m(news)
+            m(gameNewsList)
         );
     }
 };

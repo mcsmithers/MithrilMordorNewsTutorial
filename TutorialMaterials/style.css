@@ -21,6 +21,10 @@ img {
     color: #E8EAF6;
 }
 
+a.navbar-brand{
+    color: #E8EAF6;
+}
+
 .loading {
     padding: 15px 15px 15px 15px;
     margin: 15px 15px;
@@ -40,16 +44,17 @@ img {
 
 .navbar>.container-fluid .navbar-brand {
     margin-left: -15px;
-    color: #E8EAF6;
+    color: a.btn.btn-secondary.btn-lg.activ;
 }
 
 .navbar-collapse.collapse {
     background-color: #3F51B5;
 }
 
-.btn-primary-outline {
+.a.btn.btn-secondary.btn-lg.active {
     background-color: transparent;
-    border-color: #ccc;
+    color: #E8EAF6;
+    border-color: #E8EAF6;
     align: right;
     position: absolute;
     right: 0px;
