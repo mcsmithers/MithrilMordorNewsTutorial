@@ -378,7 +378,7 @@ app.listen(port);
 ### Conclusion
 Congratulations, you did it!
 
-![Result](./finished-app.jpg "Result")
+![Result](./finished-app.JPG "Result")
 
 In this tutorial we were introduced to the Mithril JS framework. We got to explore the ease in its use of a virtual DOM and how to create and update HTML.  We have created components that allowed us to make an app that talked to a server. We've demonstrated how simple it can be to perform routing for a single page application and finally authenticated a user. There are many more features that MithrilJS offers such as being a great way to learn functional programming and the effortless routing.
 
