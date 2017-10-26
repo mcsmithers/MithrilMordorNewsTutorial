@@ -1,15 +1,14 @@
 # Learn MithrilJS: Build a Game News App with Authentication
-![Mithril logo](./logo.jpg "Mithril Logo")
+![Mithril logo](https://github.com/mcsmithers/MithrilMordorNewsTutorial/blob/master/logo.jpg "Mithril Logo")
 
 
-## TL;DR:  
-This tutorial will  introduce you to [Mithril](https://Mithril.js.org/), a JavaScript framework.  Mithril is a client-side JavaScript framework for building single page applications (SPAs).  Mithril has efficiency in mind.  
+**TL;DR:** This tutorial will  introduce you to [Mithril](https://Mithril.js.org/), a JavaScript framework.  Mithril is a client-side JavaScript framework for building single page applications (SPAs).  Mithril has efficiency in mind.
 
-We are going to make an app that will retrieve news of a game using the [Valve Steam API](https://developer.valvesoftware.com/wiki/Steam_Web_API).  After that, we will use [Auth0](https://auth0.com/) to authenticate with a login.
+We are going to make an app that will retrieve news of a game using the [Valve Steam API](https://developer.valvesoftware.com/wiki/Steam_Web_API).  After that, we will use [Auth0](https://auth0.com/) to authenticate with a login. This [GitHub repo](https://github.com/mcsmithers/MithrilMordorNewsTutorial) contains the code that we are using in this tutorial.
 
 ### Meet Mithril
 
-Mithril is a client-side JavaScript MVC framework created by Leo Horie. Mithril is light and speedy.  It's named after the metal used in armor from J.R.R. Tolkein's Lord of the Rings trilogy.  You will find it used in the Guild Wars 2 game, Nike, and Udemy. 
+Mithril is a client-side JavaScript MVC framework created by Leo Horie. Mithril is light and speedy.  It's named after the metal used in armor from [J.R.R. Tolkein's Lord of the Rings trilogy](https://en.wikipedia.org/wiki/The_Lord_of_the_Rings).  You will find it used in the Guild Wars 2 game, Nike, and Udemy. 
 
 ### Purpose and Features
 
@@ -27,11 +26,32 @@ The [Steam Web API](https://developer.valvesoftware.com/wiki/Steam_Web_API) is a
 
 We will begin the tutorial by setting up our tools we will be using. Without further ado, let's get started!
 
+### Installation
+Clone this repository, then navigate to the `TutorialMaterials` directory where the project lives.  Here is a glance at how the project is structured:
+
+```
+README.md
+    | TutorialMaterials
+        index.html
+        style.css
+        package.json
+        src
+            auth.js
+            index.js
+            | views
+                game-news-list.js
+                login-button.js
+                navbar.js
+                news.js
+```
+
+After you clone the project and navigate into the `Tutorial Files` directory, open a terminal and navigate to the Tutorial Files directory to where `index.html` lives. Open `index.html` in a browser and run `npm start` to run the project.  
+
 ### Dependencies
 
 Again, part of Mithril's beauty is that it frees you of a long list of dependencies so this will be brief. To start with, I will need to have [Node](https://nodejs.org/en/) installed on your system.   If you don't have it already, you can download it from their [website](https://nodejs.org/en/download/).  There are many ways to install Mithril on your system if you prefer [other](https://Mithril.js.org/installation.html) such as with Bower is you prefer that instead. We will use Webpack like the Mithril page does: `npm install mithril --save`, run `npm install webpack --save` and then `npm init --yes` to generate the `package.json` file. We will be using es6 syntax, so if you don't have [Babel](https://babeljs.io/blog/2015/10/31/setting-up-babel-6) set up you will want to do so.  You will also need the [Babel Loader](https://github.com/babel/babel-loader).
 
-Using npm, we will use the `npm --install yes`. Update the package file to call up the script with `"start": "webpack src/index.js bin/app.js -d --watch"` in the scripts.
+Using npm, we will use the `npm install --yes`. Update the package file to call up the script with `"start": "webpack src/index.js bin/app.js -d --watch"` in the scripts.
 
 One of the advantages of Mithril is that it is fairly boilerplate-free. The reason why is to preserve the tiny size of Mithril so you only use what you need. You won't be locked into a long list of dependencies which makes everything lighter. If you want to use a boilerplate, there are several of them listed in the [developer resources](https://github.com/MithrilJS/Mithril.js/wiki/Developer-Tools#starter-kits) on the Github page. We will keep this tutorial simple as well as with the spirit of Mithril and keep frameworks minimal. You will need a `src/index.js` file and an `index.html`. 
 
@@ -41,7 +61,7 @@ For styling, we will use [Bootstrap](http://getbootstrap.com/). For this tutoria
 
 We will use the [Steam  Web API](https://developer.valvesoftware.com/wiki/Steam_Web_API).  If you don't have a Steam account already, it is free as is the API.  If you already have an account, sign in first.  Once you are logged into an account, you can get a key from [here](https://steamcommunity.com/dev/apikey).  We will use the [CORS](ttps://cors.now.sh) tool to help the Steam API to work without needing a server.
 
- Security is becoming arguably as important as a good interface, so with a hosted page login, we should be covered. The last piece we will add is authentication with Auth0 and [passport.js](https://github.com/auth0/passport-auth0) to use tokens for the login page. `npm install --save auth0-js` is what you need to install the Auth0 piece.  `npm install passport-auth0` is how we will install passport to handle the JSON tokens.  
+ Security is becoming arguably as important as a good interface, so with a hosted page login, we should be covered. We will use Express to help with the heavy lifting on the this piece.  If you do not have ExpressJS, you can install it with `npm install express --save`. The last piece we need is the Auth0JS .  To get Auth0JS, you just need to `npm install express --save`.
 
 
 
@@ -49,7 +69,7 @@ We will use the [Steam  Web API](https://developer.valvesoftware.com/wiki/Steam_
 
 Now it is time to get the skeleton parts made. Mithril uses HTML5, so you won't need the `html`, `head`, and `body` tags. The respective DOM elements are still there though implicitly when a browser renders the markup. This keeps with the theme of simplicity in Mithril. When you make a Mithril application, the application lives in a namespace and will contain modules. This is the model part of the MVC framework. Each module will represent a component or a page. In other words, we bind each HTML tag that exists in the DOM to the Mithril so you can get a virtual HTML page without having to actually write HTML. If you have worked with the popular frameworks, then this should feel similar. To demonstrate this, here's the main layout:
 
-```javascript
+```js
 // index.js
 import m from 'mithril';
 
@@ -82,7 +102,7 @@ Not bad, eh? Almost time to make this app do cool stuff. You may have noticed th
 
 Let's now start making this app do something by adding a file named `game-news-list.js` that contains:
 
-```javascript
+```js
 // src/views/game-news-list.js
 import m from 'mithril';
 import navbar from './navbar';
@@ -121,7 +141,7 @@ We will also want to be able to handle the state of our game news list changing 
 
 Let's create a file called `news.js`:
 
-```javascript
+```js
 //src/views/news.js
 import m from 'mithril';
 import stream from 'mithril/stream';
@@ -151,7 +171,7 @@ Now that we have what we need from Steam, it's time to make this look nicer and 
 
 This app can really use a navbar where the header is.  Delete the header from the `game-news-list.js` file since we are going to make this a navbar instead.  Let's take care of the navbar component:
 
-```javascript
+```js
 // src/views/navbar.js
 import m from 'mithril';
 import loginButton from './login-button';
@@ -245,21 +265,21 @@ The Hosted Login Page is easily customizable right from the Dashboard. By defaul
 
 1.  Let's go the the [Auth0 dashboard](https://manage.auth0.com/#/) to begin. In the Dashboard, you can enable a custom Hosted Login Page by navigating to the left-hand menu and selecting the Hosted Pages menu. We will have to create a client so we can enable this for our application.  This is going to be a single-page application.
 
-![Dashboard](./CreateClient.jpg)
+![Dashboard](https://github.com/mcsmithers/MithrilMordorNewsTutorial/blob/master/CreateClient.JPG)
 
 JavaScript is the technology we are using, so select it from the technologies.  The next prompt will tell us that we have to configure the callback URLs.  We have already installed Auth0, so we will proceed to the next step where we will go to the`index.html` file and paste the CDN in as a script: `<script type="text/javascript" src="node_modules/auth0-js/build/auth0.js"></script>`.  
 
 We will need to get the callback url in Auth0, so let's take care of that by going back to the Auth0 dashboard, selecting Clients on the left and then select our app.  The callback urls are in the settings tab.
 
-![AppClient](./mithrilGameApp.JPG) 
+![AppClient](https://github.com/mcsmithers/MithrilMordorNewsTutorial/blob/master/mithrilGameApp.JPG) 
 
 For a single-page app like ours, you can just put that in the Allowed Origins/CORS box closer to the bottom and click Save.  for other appliations, you would set the callback url to `http://localhost:5000` and click the Save button on the bottom.  
 
 2.  The next step is to set up a hosted login page.  You can find the menu to that on the left-hand side menu.  Toggle the switch to to enable a login page. 
 
-![Start Login Page](./startloginPage.jpg)
+![Start Login Page](https://github.com/mcsmithers/MithrilMordorNewsTutorial/blob/master/startLoginPage.JPG)
 
-2.  Next we will choose the login technology we want to use. You will have three options to use the hosted page; Lock, Lock Passwordless, and Auth0.js v8 which involves using the SDK.  We will be using the Lock.  For your reference, here's the breakdown of each one:
+.  Next we will choose the login technology we want to use. You will have three options to use the hosted page; Lock, Lock Passwordless, and Auth0.js v8 which involves using the SDK.  We will be using the Lock.  For your reference, here's the breakdown of each one:
 
 * Lock - This is the easiest route to utilize the hosted pages.  It's prebuilt and customizable that easily allows the users to login.
 * Lock Passwordless - The Lock Passwordless is similar to the Lock in its UI.  Where it differs is that instead of offering options to the user, it will ask the user for an email or number to receive SMS messages to authenticate without paswords.
@@ -279,7 +299,7 @@ We won't do any special customization in this tutorial, but if you have any spec
 ### Implement Authentication
 Now we can create a new component for a login by making a button and call it `login-button.js`.  Once you have that, import it into the `navbar,js` file right outside the `container-fluid` class.  We will style it as well in the same style file as the other styling we have done. The link you will use in the button will be the one you will get from the hosted login page when you click the preview button.
 
-```javascript
+```js
 //src/viewslogin-button.css
 import m from 'mithril';
 
@@ -307,78 +327,23 @@ a.btn.btn-secondary.btn-sm.active {
 }
 ```
 
-In order to have our login perform it is supposed to, we need to get our JSON web tokens (https://jwt.io/) to be accessible for the login.  To help us with that, we will use `Passport.js`.  The logic we have in here is from the library itself.  All you need to do is put in your Auth0 credentials. Let's make a file called `auth.js`:
+In order to have our login perform it is supposed to, we need to get our JSON web tokens (https://jwt.io/) to be accessible for the login.  As mentioned earlier, we will use ExpressJS to help with the authentication.  The logic we have in here is from the library itself.  All you need to do is put in your Auth0 credentials. 
 
-```javascript
-import passport from 'passport';
-import auth0 from 'auth0';
+Head over to the `index.html` file and then put in the script given by Auth0.
 
-var Auth0Strategy = require('passport-auth0'),
-    passport = require('passport');
-
-var strategy = new Auth0Strategy({
-   domain:       'domain.auth0.com',
-   clientID:     'your-client-id',
-   clientSecret: 'your-auth0-client-secret',
-   callbackURL:  'http://localhost:5000'
-  },
-  function(accessToken, refreshToken, extraParams, profile, done) {
-    return done(null, profile);
-  }
-);
-
-passport.use(strategy);
-
-app.get('/callback',
-passport.authenticate('auth0', { failureRedirect: '/login' }),
-function(req, res) {
-  if (!req.user) {
-    throw new Error('user null');
-  }
-  res.redirect("/");
-}
-);
-
-app.get('/login',
-passport.authenticate('auth0', {}), function (req, res) {
-res.redirect("/");
-});
-
-var express = require('express');
-var app = express();
-var jwt = require('express-jwt');
-var jwks = require('jwks-rsa');
-
-var port = process.env.PORT || 8080;
-
-var jwtCheck = jwt({
-    secret: jwks.expressJwtSecret({
-        cache: true,
-        rateLimit: true,
-        jwksRequestsPerMinute: 5,
-        jwksUri: "https://your-url.auth0.com/.well-known/jwks.json"
-    }),
-    audience: 'http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=241930&count=5&maxlength=300&format=json',
-    issuer: "https://user.auth0.com/",
-    algorithms: ['RS256']
-});
-
-app.use(jwtCheck);
-
-app.get('/authorized', function (req, res) {
-  res.send('Secured Resource');
-});
-
-app.listen(port);
-
+```html
 
 ```
+Let's make a file called `auth.js` with the following:
 
+```js
+
+```
 
 ### Conclusion
 Congratulations, you did it!
 
-![Result](./finished-app.JPG "Result")
+![Result](https://github.com/mcsmithers/MithrilMordorNewsTutorial/blob/master/finished-app.JPG "Result")
 
 In this tutorial we were introduced to the Mithril JS framework. We got to explore the ease in its use of a virtual DOM and how to create and update HTML.  We have created components that allowed us to make an app that talked to a server. We've demonstrated how simple it can be to perform routing for a single page application and finally authenticated a user. There are many more features that MithrilJS offers such as being a great way to learn functional programming and the effortless routing.
 

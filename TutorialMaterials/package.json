@@ -1,7 +1,7 @@
 {
-  "name": "mithrilmordoenewstutorial",
+  "name": "mithrilmordornewstutorial",
   "version": "1.0.0",
-  "description": "\"# MithrilMorseTutorial\"",
+  "description": "\"# MithrilMordorTutorial\"",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -13,6 +13,7 @@
   "dependencies": {
     "auth0-js": "^8.10.1",
     "babel-core": "^6.26.0",
+    "express": "^4.16.2",
     "mithril": "^1.1.4"
   },
   "devDependencies": {
@@ -22,7 +23,7 @@
     "webpack": "^3.6.0"
   },
   "bin": {
-    "mithrilmordoenewstutorial": "app.js"
+    "mithrilmordornewstutorial": "app.js"
   },
   "repository": {
     "type": "git",

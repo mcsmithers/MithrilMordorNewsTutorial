@@ -1,63 +1,12 @@
-import passport from 'passport';
-import auth0 from 'auth0';
+// src/auth.js
 
-var Auth0Strategy = require('passport-auth0'),
-    passport = require('passport');
+import auth0 from 'auth0-js';
+import m from 'mithril';
 
-// Enter your Auth0 credentials here
-var strategy = new Auth0Strategy({
-   domain:       'your-domain.auth0.com',
-   clientID:     'your-id',
-   clientSecret: 'your-secret',
-   callbackURL:  'http://localhost:5000'
-  },
-  function(accessToken, refreshToken, extraParams, profile, done) {
-    return done(null, profile);
-  }
-);
 
-passport.use(strategy);
 
-app.get('/callback',
-passport.authenticate('auth0', { failureRedirect: '/login' }),
-function(req, res) {
-  if (!req.user) {
-    throw new Error('user null');
-  }
-  res.redirect("/");
-}
-);
 
-app.get('/login',
-passport.authenticate('auth0', {}), function (req, res) {
-res.redirect("/");
-});
-
-var express = require('express');
-var app = express();
-var jwt = require('express-jwt');
-var jwks = require('jwks-rsa');
-
-var port = process.env.PORT || 8080;
-
-// Enter the credentials from Auth0 here
-var jwtCheck = jwt({
-    secret: jwks.expressJwtSecret({
-        cache: true,
-        rateLimit: true,
-        jwksRequestsPerMinute: 5,
-        jwksUri: "https://uri.auth0.com/.well-known/jwks.json"
-    }),
-    audience: 'http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/?appid=241930&count=5&maxlength=300&format=json',
-    issuer: "https://issuer.auth0.com/",
-    algorithms: ['RS256']
-});
-
-app.use(jwtCheck);
-
-app.get('/authorized', function (req, res) {
-  res.send('Secured Resource');
-});
-
-app.listen(port);
-
+//   - the app's main component should use the auth0.js `parseHash()` method to extract the necessary data from the hash: this data should be an `accessToken`, `idToken`, and `expiresIn` (see https://auth0.com/docs/libraries/auth0js/v8#extract-the-authresult-and-get-user-info)
+//   - if desired, the app can make a call to the auth0.js `client.userInfo()` endpoint to retrieve the user's profile data
+//   - a JS app can then store tokens, expiration, and user data in localStorage, where it can easily be accessed by the app at any time
+//   - in order to log out, the localStorage data should be deleted. this revokes access to the app and any APIs that might require the access token
